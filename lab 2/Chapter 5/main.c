@@ -23,17 +23,17 @@
 void SWI1_EGU1_IRQHandler(void) {
     NRF_EGU1->EVENTS_TRIGGERED[0] = 0;
     printf("Software\n");
-    nrf_delay_ms(10000);
+    nrf_delay_ms(5000);
 }
 
 void GPIOTE_IRQHandler(void) {
     NRF_GPIOTE->EVENTS_IN[0] = 0;
-    printf(" Button\n");
+    printf(" Button Interrupt!\n");
     //while(1){
       gpio_clear(25);
       nrf_delay_ms(5000);
       gpio_set(25);
-      nrf_delay_ms(1000);
+      nrf_delay_ms(500);
     //}
 }
 
@@ -48,11 +48,13 @@ int main(void) {
 
   NRF_GPIOTE->CONFIG[0] = 0x21C01;
   NRF_GPIOTE->INTENSET = 0x1;
+  NRF_GPIOTE->CONFIG[1]=0x21C01;
   NVIC_EnableIRQ(GPIOTE_IRQn);
 
-  gpio_config(28, 0);
-  gpio_config(25, 1);
-  gpio_set(25);
+  gpio_config(28, 0);       //BUTTON0 as input
+  gpio_config(22, 0);       //SWITCH0 as input
+  gpio_config(25, 1);       //LED0 as output
+  gpio_set(25);             //Turn of the LED
 
   software_interrupt_init();
 
@@ -62,7 +64,10 @@ int main(void) {
   // loop forever
   while (1) {
     printf("Looping\n");
-    nrf_delay_ms(10000);
+    //if(gpio_read(22)){
+    //  __WFI();
+    //}
+    nrf_delay_ms(500);
     software_interrupt_generate();
   }
 }
